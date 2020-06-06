@@ -22,4 +22,5 @@ e.g:
     echo "111.111.111.111"|python3 shodanfy.py --stdin 
     echo "111.111.111.111"|python3 shodanfy.py --stdin --getvuln 
     cat ips.txt|python3 shodanfy.py --stdin --getports
+    dig google.com +short A | grep -oi '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' | python3 shodanfy.py --stdin --geports
 ```
