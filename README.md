@@ -1,6 +1,8 @@
-# Shodanfy.py (__Don't use this tool because your ip will be blocked by Shodan!__ )
+# Shodanfy.py (```diff Don't use this tool because your ip will be blocked by Shodan!``` )
+
 
 Get ports,vulnerabilities,informations,banners,..etc for any IP with Shodan (no apikey! no rate limit!)
+
 
 ![main](https://i.imgur.com/TgTEYfL.png)
 
