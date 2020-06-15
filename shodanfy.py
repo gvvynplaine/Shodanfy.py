@@ -29,6 +29,17 @@ import re
 
 def getContentFromShodan(ip:str,proxy:str)->str:
     try:
+        if "ipinfo" in proxy:
+            return requests.get(
+                '{}'.format(ip),
+                headers = {
+                    'User-Agent' : 'Mozilla/5.0'
+                },
+                proxies = {
+                    'http' : proxy,
+                    'https' : proxy,
+                }
+            )
         return requests.get(
             'https://www.shodan.io/host/{}'.format(ip),
             headers = {
@@ -49,6 +60,10 @@ def main(args:dict) -> None:
     v = {}
     d = []
     proxy = args.get('proxy')
+    socks5 = args.get('socks5')
+    socks5 = "socks5://{}".format(socks5)
+    if len(socks5) >= len(proxy):
+        proxy = socks5
     getports = False if args.get('getports') == False else True
     getinfo = False if args.get('getinfo') == False else True
     getvuln = False if args.get('getvulns') == False else True
@@ -61,6 +76,9 @@ def main(args:dict) -> None:
         getports=getinfo=getvuln=getmoreinfo=getbanner=True
     # --- 
     r = getContentFromShodan(ip,proxy=proxy)
+    r2 = getContentFromShodan('http://ipinfo.io',proxy=proxy)
+    ip_candidates = re.findall(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", r2.text)
+    print("[*] YOUR IP: " + ip_candidates[0])
     if r.status_code == 200:
         tree = html.fromstring(r.content)
         if tree.xpath('//ul[@class="ports"]/li/a/text()') != []:
@@ -139,7 +157,8 @@ args = {
     'getall': True,
     'ip':  "",
     'stdin':False,
-    'proxy': ""
+    'proxy': "",
+    'socks5': ""
 }
 
 if __name__ == "__main__":
@@ -147,6 +166,7 @@ if __name__ == "__main__":
         print('Usage: python3 shodanfy.py <ip> [OPTIONS]\n')
         print('\t--stdin\t\tGet ips from stdin (required)')
         print('\t--proxy\t\tSet proxy (host:port)')
+        print('\t--socks5\t\tSet proxy socks5 (host:port)')
         print('\t--getall\tGet all informations,vulns,.. (Default)')
         print('\t--getvuln\tGet vulnerabilities for this ip (CVEs)')
         print('\t--getinfo\tGet basic info (hostname,ports,country..)')
@@ -170,6 +190,13 @@ if __name__ == "__main__":
                     'Please check your proxy, (host:port)'
                 ))
             args.update({"proxy":str(proxy)})
+        if arg == '--socks5':
+            socks5 = sys.argv[sys.argv.index('--socks5') + 1]
+            if '--' in socks5:
+                sys.exit(print(
+                    'Please check your proxy socks5, (host:port)'
+                ))
+            args.update({"socks5":str(socks5)})
         if arg == '--getports':
             args['getports'] = True
         if arg == '--stdin':
